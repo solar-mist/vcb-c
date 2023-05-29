@@ -1,9 +1,11 @@
 // Copyright 2023 solar-mist
 
 
+#include "parser/ast.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <lexer/lexer.h>
+#include <parser/parser.h>
 
 int main(int argc, char** argv)
 {
@@ -26,10 +28,12 @@ int main(int argc, char** argv)
 
     struct token* tokens = lexer_lex(buffer);
 
-    struct token* curr = tokens;
+    struct ast_node* ast = parser_parse(tokens);
+
+    struct ast_node* curr = ast;
     while(curr)
     {
-        printf("Token: %s\n", token_type_to_string(curr->type));
+        print_ast_node(curr);
         curr = curr->next;
     }
     fflush(stdout);

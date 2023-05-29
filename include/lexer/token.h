@@ -11,13 +11,14 @@ enum token_type
     TOK_LPAREN, TOK_RPAREN,
 
     TOK_LBRACE, TOK_RBRACE,
+
+    TOK_SEMICOLON,
 };
 
 struct token
 {
     enum token_type type;
     char* text;
-
     struct token* next;
 };
 

@@ -9,8 +9,8 @@
 static int position = 0;
 char* file;
 
-char current();
-char consume();
+char lexer_current();
+char lexer_consume();
 struct token* add_token(struct token* arr, struct token* tok);
 struct token* lexer_next();
 
@@ -18,26 +18,26 @@ struct token* lexer_lex(char* buffer)
 {
     struct token* tokens = NULL;
     file = buffer;
-    while(current() != EOF)
+    while(lexer_current() != EOF)
     {
         tokens = add_token(tokens, lexer_next());
-        consume();
+        lexer_consume();
     }
     return tokens;
 }
 
 
-char current()
+char lexer_current()
 {
     return file[position];
 }
 
-char consume()
+char lexer_consume()
 {
     return file[position++];
 }
 
-char peek(int off)
+char lexer_peek(int off)
 {
     return file[position + off];
 }
@@ -64,26 +64,26 @@ struct token* add_token(struct token* tokens, struct token* tok)
 
 struct token* lexer_next()
 {
-    while(isspace(current()))
-        consume();
+    while(isspace(lexer_current()))
+        lexer_consume();
     
-    if(isalpha(current()) || current() == '_')
+    if(isalpha(lexer_current()) || lexer_current() == '_')
     {
         char* text = malloc(256);
         int n = 0;
-        text[n++] = current();
+        text[n++] = lexer_current();
 
-        while(isalnum(peek(1)) || peek(1) == '_')
+        while(isalnum(lexer_peek(1)) || lexer_peek(1) == '_')
         {
-            consume();
-            text[n++] = current();
+            lexer_consume();
+            text[n++] = lexer_current();
         }
         text[n] = 0;
 
         return new_token(TOK_IDENT, text);
     }
 
-    switch(current())
+    switch(lexer_current())
     {
         case '(':
             return new_token(TOK_LPAREN, NULL);
@@ -93,8 +93,10 @@ struct token* lexer_next()
             return new_token(TOK_LBRACE, NULL);
         case '}':
             return new_token(TOK_RBRACE, NULL);
+        case ';':
+            return new_token(TOK_SEMICOLON, NULL);
         default:
-            printf("vcbc: unexpected token: %c", current());
+            printf("vcbc: unexpected token: %c", lexer_current());
             exit(EXIT_FAILURE);
     }
 }

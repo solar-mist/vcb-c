@@ -28,6 +28,8 @@ char* token_type_to_string(enum token_type type)
             return "LBRACE";
         case TOK_RBRACE:
             return "RBRACE";
+        case TOK_SEMICOLON:
+            return "SEMICOLON";
     }
     return "";
 }
