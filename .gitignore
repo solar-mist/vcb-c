@@ -1,6 +1,7 @@
 vcbc
 
 *.o
+*.vcbasm
 *.json
 
 .cache/*

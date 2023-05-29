@@ -1,11 +1,11 @@
 // Copyright 2023 solar-mist
 
 
-#include "parser/ast.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <lexer/lexer.h>
 #include <parser/parser.h>
+#include <backend/backend.h>
 
 int main(int argc, char** argv)
 {
@@ -30,11 +30,10 @@ int main(int argc, char** argv)
 
     struct ast_node* ast = parser_parse(tokens);
 
-    struct ast_node* curr = ast;
-    while(curr)
-    {
-        print_ast_node(curr);
-        curr = curr->next;
-    }
-    fflush(stdout);
+    remove("out.vcbasm");
+    FILE* outfile = fopen("out.vcbasm", "a");
+    backend_generate(ast, outfile);
+
+    fflush(outfile);
+    fclose(outfile);
 }
