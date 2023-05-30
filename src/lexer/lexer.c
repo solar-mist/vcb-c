@@ -1,6 +1,7 @@
 // Copyright 2023 solar-mist
 
 
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -80,7 +81,26 @@ struct token* lexer_next()
         }
         text[n] = 0;
 
+        if(!strcmp(text, "return"))
+            return new_token(TOK_RETURN, 0);
+
         return new_token(TOK_IDENT, text);
+    }
+    if(isdigit(lexer_current()))
+    {
+        char* text = malloc(256);
+        int n = 0;
+        text[n++] = lexer_current();
+
+        while(isdigit(lexer_peek(1)))
+        {
+            lexer_consume();
+            text[n++] = lexer_current();
+        }
+
+        text[n] = 0;
+
+        return new_token(TOK_INTEGER, text);
     }
 
     switch(lexer_current())

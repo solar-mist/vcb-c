@@ -12,6 +12,7 @@ bool bypass = false;
 
 struct ast_node* add_node(struct ast_node* nodes, struct ast_node* node);
 struct token* parser_current();
+struct token* parser_consume();
 void expect_token(enum token_type type);
 struct ast_node* parse_expression();
 
@@ -24,6 +25,10 @@ struct ast_node* parser_parse(struct token* tokens)
     {
         nodes = add_node(nodes, parse_expression());
         expect_token(TOK_SEMICOLON);
+        if(!bypass)
+            parser_consume();
+        else
+            bypass = false;
     }
 
     return nodes;
@@ -51,13 +56,12 @@ struct token* parser_peek(int off)
 
 void expect_token(enum token_type type)
 {
-    if(bypass)
-        bypass = false;
-    else if(parser_current()->type != type)
-    {
-        printf("Expected: %s. Found: %s", token_type_to_string(parser_current()->type), token_type_to_string(type));
-        exit(EXIT_FAILURE);
-    }
+    if(!bypass)
+        if(parser_current()->type != type)
+        {
+            printf("Expected: %s. Found: %s", token_type_to_string(type), token_type_to_string(parser_current()->type));
+            exit(EXIT_FAILURE);
+        }
 }
 
 struct ast_node* add_node(struct ast_node* nodes, struct ast_node* node)
@@ -97,9 +101,15 @@ struct ast_node* parse_func_def()
     expect_token(TOK_LBRACE);
     parser_consume();
 
-    // TODO: Parse body
+    struct ast_node* children = NULL;
 
-    expect_token(TOK_RBRACE);
+
+    while(parser_current()->type != TOK_RBRACE)
+    {
+        children = add_node(children, parse_expression());
+        expect_token(TOK_SEMICOLON);
+        parser_consume();
+    }
     parser_consume();
 
     bypass = true; // skip check for semicolon
@@ -107,13 +117,37 @@ struct ast_node* parse_func_def()
     union ast_node_value value;
     value.func.name = name;
 
-    return new_ast_node(AST_FUNC_DEF, value, NULL, 0);
+    return new_ast_node(AST_FUNC_DEF, value, children);
+}
+
+struct ast_node* parse_integer_literal()
+{
+    union ast_node_value value;
+    value.integer.text = parser_consume()->text;
+    
+    return new_ast_node(AST_INTEGER, value, NULL);
+}
+
+struct ast_node* parse_return_statement()
+{
+    parser_consume();
+    struct ast_node* retval = parse_expression();
+
+    return new_ast_node(AST_RETURN, (union ast_node_value){}, retval);
 }
 
 struct ast_node* parse_primary()
 {
     switch(parser_current()->type)
     {
+        case TOK_INTEGER:
+        {
+            return parse_integer_literal();
+        }
+        case TOK_RETURN:
+        {
+            return parse_return_statement();
+        }
         case TOK_IDENT:
         {
             if(parser_peek(2)->type == TOK_LPAREN)

@@ -20,6 +20,10 @@ char* token_type_to_string(enum token_type type)
     {
         case TOK_IDENT:
             return "IDENT";
+        case TOK_RETURN:
+            return "RETURN";
+        case TOK_INTEGER:
+            return "INTEGER";
         case TOK_LPAREN:
             return "LPAREN";
         case TOK_RPAREN:

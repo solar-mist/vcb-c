@@ -8,6 +8,10 @@ enum token_type
 {
     TOK_IDENT,
 
+    TOK_RETURN,
+
+    TOK_INTEGER,
+
     TOK_LPAREN, TOK_RPAREN,
 
     TOK_LBRACE, TOK_RBRACE,
